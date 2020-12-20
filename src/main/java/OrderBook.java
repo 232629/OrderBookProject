@@ -1,43 +1,24 @@
-import com.sun.org.apache.xerces.internal.xs.StringList;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
-public class OrderBook {
-
-
-
+public class OrderBook implements IOrderBook {
 
     HashMap<UUID, Order> asks = new HashMap<UUID, Order>();
     HashMap<UUID, Order> bids = new HashMap<UUID, Order>();
 
-
-    public OrderBook() {
-
+    public UUID addAsk (BigDecimal price, int quantity) {
+        return addOrder(true, price, quantity);
     }
 
-    public String addOrder () {
-
-        return "";
+    public UUID addBid (BigDecimal price, int quantity) {
+        return addOrder(false, price, quantity);
     }
 
-    public UUID addAsk (double price, double quantity) {
-        UUID id = UUID.randomUUID();
-        asks.put(id, new Order(price, quantity));
-        return id;
-    }
-
-    public UUID addBid (double price, double quantity) {
-        UUID id = UUID.randomUUID();
-        bids.put(id, new Order(price, quantity));
-        return id;
-    }
-
-    public boolean cancelOrder (String id) {
+    public boolean cancelOrder (UUID id) {
         if (asks.containsKey(id)) {
             asks.remove(id);
             return true;
@@ -67,13 +48,19 @@ public class OrderBook {
         return jsonOrderBook.toJSONString();
     }
 
+    private UUID addOrder (boolean ask, BigDecimal price, int quantity) {
+        UUID id = UUID.randomUUID();
+        if (ask)
+            asks.put(id, new Order(price, quantity));
+        else
+            bids.put(id, new Order(price, quantity));
+        return id;
+    }
 
     private JSONArray formatData(HashMap<UUID, Order> orders) {
 
-        //List<Order> listOrders = orders.values().stream().collect(Collectors.toList());
         List<Order> listOrders = new ArrayList<>(orders.values());
         listOrders.sort(Comparator.comparing(order -> order.price));
-
 
         JSONArray jaOrders = new JSONArray();
         for (Order a: listOrders) {
@@ -87,7 +74,6 @@ public class OrderBook {
 
         return jaOrders;
     }
-
 
 
 }

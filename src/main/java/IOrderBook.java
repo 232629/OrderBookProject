@@ -1,7 +1,10 @@
+import java.math.BigDecimal;
+import java.util.UUID;
+
 public interface IOrderBook {
-    String addAsk(double price, double quantity );
-    String addBid(String price, double quantity );
-    void cancelOrder (String id);
-    String getOrder (String id);
+    UUID addAsk(BigDecimal price, int quantity);
+    UUID addBid(BigDecimal price, int quantity);
+    boolean cancelOrder (UUID id);
+    Order getOrder (UUID id);
     String getMarketData ();
 }
