@@ -14,7 +14,7 @@ public class Order {
         this.price = price.setScale(2, BigDecimal.ROUND_DOWN);
         if (price.compareTo(this.price) != 0 )
             throw new IllegalArgumentException();
-        if (price.compareTo(new BigDecimal("0")) <= 0 || price.compareTo(new BigDecimal("999999.99")) > 1 )
+        if (price.compareTo(new BigDecimal("0")) <= 0 || price.compareTo(new BigDecimal("999999.99")) == 1 )
             throw new IllegalArgumentException();
 
         if (quantity <= 0 || quantity > 999999)

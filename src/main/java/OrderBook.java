@@ -1,3 +1,4 @@
+import com.google.gson.GsonBuilder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -7,28 +8,42 @@ import java.util.*;
 
 public class OrderBook implements IOrderBook {
 
-    HashMap<UUID, Order> asks = new HashMap<UUID, Order>();
-    HashMap<UUID, Order> bids = new HashMap<UUID, Order>();
+    private HashMap<UUID, Order> asks = new HashMap<UUID, Order>();
+    private HashMap<UUID, Order> bids = new HashMap<UUID, Order>();
 
     public UUID addAsk (BigDecimal price, int quantity) {
-        return addOrder(true, price, quantity);
+        return addOrder(OrderType.ASK, price, quantity);
     }
 
     public UUID addBid (BigDecimal price, int quantity) {
-        return addOrder(false, price, quantity);
+        return addOrder(OrderType.BID, price, quantity);
     }
 
-    public boolean cancelOrder (UUID id) {
+    private UUID addOrder (OrderType orderType, BigDecimal price, int quantity) {
+        UUID id = UUID.randomUUID();
+        switch(orderType) {
+            case ASK:
+                asks.put(id, new Order(price, quantity));
+                break;
+            case BID:
+                bids.put(id, new Order(price, quantity));
+                break;
+        }
+
+        return id;
+    }
+
+    public UUID cancelOrder (UUID id) {
         if (asks.containsKey(id)) {
             asks.remove(id);
-            return true;
+            return id;
         }
         else if (bids.containsKey(id)) {
             bids.remove(id);
-            return true;
+            return id;
         }
 
-        return false;
+        return null;
     }
 
     public Order getOrder (UUID id) {
@@ -41,21 +56,15 @@ public class OrderBook implements IOrderBook {
     }
 
     public String getMarketData () {
-
         JSONObject jsonOrderBook = new JSONObject();
         jsonOrderBook.put("asks", formatData(asks));
         jsonOrderBook.put("bids", formatData(bids));
-        return jsonOrderBook.toJSONString();
+
+
+
+        return new GsonBuilder().setPrettyPrinting().create().toJson(jsonOrderBook);
     }
 
-    private UUID addOrder (boolean ask, BigDecimal price, int quantity) {
-        UUID id = UUID.randomUUID();
-        if (ask)
-            asks.put(id, new Order(price, quantity));
-        else
-            bids.put(id, new Order(price, quantity));
-        return id;
-    }
 
     private JSONArray formatData(HashMap<UUID, Order> orders) {
 
