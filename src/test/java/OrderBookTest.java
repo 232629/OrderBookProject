@@ -1,13 +1,16 @@
 import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
+@ExtendWith(MyTestWatcher.class)
 class OrderBookTest {
 
     private OrderBook ob;
@@ -114,7 +117,6 @@ class OrderBookTest {
         });
     }
 
-
     @Test
     void cancelNotExistOrder() {
         Assert.assertNull(ob.getOrder(UUID.randomUUID()));
@@ -165,21 +167,74 @@ class OrderBookTest {
     }
 
 
-    //todo
     @Test
-    void getEmptyMarketData() {
+    void checkPriceOrderMarketData() {
+
+        final int quantity = 1;
+        String small = "0.01";
+        String medium = "10.01";
+        String large = "999999.99";
+
+        ob.addAsk(new BigDecimal(large), quantity);
+        ob.addAsk(new BigDecimal(small), quantity);
+        ob.addAsk(new BigDecimal(medium), quantity);
+        ob.addBid(new BigDecimal(large), quantity);
+        ob.addBid(new BigDecimal(small), quantity);
+        ob.addBid(new BigDecimal(medium), quantity);
+
 
         Gson gson = new Gson();
         Map mapMarketData = gson.fromJson(ob.getMarketData(), Map.class);
 
         Assert.assertEquals(2, mapMarketData.size());
+        Assert.assertEquals(3, ((ArrayList) mapMarketData.get("asks")).size());
+        Assert.assertEquals(3, ((ArrayList) mapMarketData.get("bids")).size());
+
+        Assert.assertEquals(small, gson.fromJson(((ArrayList) mapMarketData.get("asks")).get(0).toString(), Map.class).get("price").toString());
+        Assert.assertEquals(medium, gson.fromJson(((ArrayList) mapMarketData.get("asks")).get(1).toString(), Map.class).get("price").toString());
+        Assert.assertEquals(large, gson.fromJson(((ArrayList) mapMarketData.get("asks")).get(2).toString(), Map.class).get("price").toString());
+        Assert.assertEquals(small, gson.fromJson(((ArrayList) mapMarketData.get("bids")).get(0).toString(), Map.class).get("price").toString());
+        Assert.assertEquals(medium, gson.fromJson(((ArrayList) mapMarketData.get("bids")).get(1).toString(), Map.class).get("price").toString());
+        Assert.assertEquals(large, gson.fromJson(((ArrayList) mapMarketData.get("bids")).get(2).toString(), Map.class).get("price").toString());
+
+    }
+
+    @Test
+    void checkQuantityMarketData() {
+
+        final int quantity = 1;
+        String price = "0.01";
+
+        ob.addAsk(new BigDecimal(price), quantity);
+        ob.addBid(new BigDecimal(price), quantity);
 
         Assert.assertEquals("{\n" +
-                "  \"asks\": [],\n" +
-                "  \"bids\": []\n" +
-                "}", ob.getMarketData());
-        
+                "  \"asks\": [\n" +
+                "    {\n" +
+                "      \"quantity\": " + quantity + ",\n" +
+                "      \"price\": 0.01\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"bids\": [\n" +
+                "    {\n" +
+                "      \"quantity\": " + quantity + ",\n" +
+                "      \"price\": 0.01\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}",
+                ob.getMarketData());
     }
+
+    @Test
+    void getEmptyMarketData() {
+        Gson gson = new Gson();
+        Map mapMarketData = gson.fromJson(ob.getMarketData(), Map.class);
+
+        Assert.assertEquals(2, mapMarketData.size());
+        Assert.assertEquals(0, gson.fromJson(mapMarketData.get("asks").toString(), Map.class).size());
+        Assert.assertEquals(0, gson.fromJson(mapMarketData.get("bids").toString(), Map.class).size());
+    }
+
 
     //-----
     @AfterEach
