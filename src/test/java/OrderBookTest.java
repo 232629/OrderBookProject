@@ -1,4 +1,5 @@
 import com.google.gson.Gson;
+import io.qameta.allure.Feature;
 import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +28,7 @@ class OrderBookTest {
     //----------
 
     @Test
+    @Feature("Add Order")
     void doubleAddSameAskOrder() {
         final BigDecimal price = new BigDecimal("1.11");
         final int quantity = 100;
@@ -38,6 +40,7 @@ class OrderBookTest {
         Assert.assertNotNull(ob.getOrder(id2));
     }
     @Test
+    @Feature("Add Order")
     void doubleAddSameBidOrder() {
         final BigDecimal price = new BigDecimal("1.11");
         final int quantity = 100;
@@ -51,17 +54,20 @@ class OrderBookTest {
 
 
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(ints = {1, 555555, 999999})
     void addValidQuantityAsk(int quantity) {
         Assert.assertEquals(quantity, ob.getOrder(ob.addAsk(new BigDecimal("1"), quantity)).quantity);
     }
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(ints = {1, 555555, 999999})
     void addValidQuantityBid(int quantity) {
         Assert.assertEquals(quantity, ob.getOrder(ob.addBid(new BigDecimal("1"), quantity)).quantity);
     }
 
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(ints = {-1, 0, 1000000})
     void addNotValidQuantityAsk(int quantity) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -69,6 +75,7 @@ class OrderBookTest {
         });
     }
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(ints = {-1, 0, 1000000})
     void addNotValidQuantityBid(int quantity) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -77,17 +84,20 @@ class OrderBookTest {
     }
 
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(strings = {".3", "0.01", "555555", "999999.99", "00000.05000000000000", "0.30", "4.5"})
     void addValidPriceAsk(String price) {
         Assert.assertEquals(new BigDecimal(price).setScale(2, BigDecimal.ROUND_DOWN), ob.getOrder(ob.addAsk(new BigDecimal(price), 555)).price);
     }
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(strings = {".3", "0.01", "555555", "999999.99", "00000.05000000000000", "0.30", "4.5"})
     void addValidPriceBid(String price) {
         Assert.assertEquals(new BigDecimal(price).setScale(2, BigDecimal.ROUND_DOWN), ob.getOrder(ob.addBid(new BigDecimal(price), 555)).price);
     }
 
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(strings = {"0", "0.0", "-1", "1000000", "0.001" })
     void addllegalArgumentExceptionPriceAsk(String price) {
        Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -95,6 +105,7 @@ class OrderBookTest {
         });
     }
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(strings = {"0", "0.0", "-1", "1000000", "0.001" })
     void addllegalArgumentExceptionPriceBid(String price) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
@@ -103,6 +114,7 @@ class OrderBookTest {
     }
 
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(strings = {"0,0", "one", "", "null", "." })
     void addFormatExceptionPriceAsk(String price) {
         Assertions.assertThrows(NumberFormatException.class, () -> {
@@ -110,6 +122,7 @@ class OrderBookTest {
         });
     }
     @ParameterizedTest
+    @Feature("Add Order")
     @ValueSource(strings = {"0,0", "one", "", "null", "." })
     void addFormatExceptionPriceBid(String price) {
         Assertions.assertThrows(NumberFormatException.class, () -> {
@@ -118,21 +131,25 @@ class OrderBookTest {
     }
 
     @Test
+    @Feature("Cancel Order")
     void cancelNotExistOrder() {
         Assert.assertNull(ob.getOrder(UUID.randomUUID()));
     }
 
     @Test
+    @Feature("Cancel Order")
     void cancelNotExistOrderNull() {
         Assert.assertNull(ob.getOrder(null));
     }
 
     @Test
+    @Feature("Cancel Order")
     void cancelExistAskOrder() {
         UUID id = ob.addAsk(new BigDecimal("0.01"), 999);
         Assert.assertEquals(id, ob.cancelOrder(id));
     }
     @Test
+    @Feature("Cancel Order")
     void cancelExistBidOrder() {
         UUID id = ob.addBid(new BigDecimal("0.01"), 999);
         Assert.assertEquals(id, ob.cancelOrder(id));
@@ -140,16 +157,19 @@ class OrderBookTest {
 
 
     @Test
+    @Feature("Get Order")
     void getNotExistOrder() {
         Assert.assertNull(ob.getOrder(UUID.randomUUID()));
     }
 
     @Test
+    @Feature("Get Order")
     void getNotExistOrderNull() {
         Assert.assertNull(ob.getOrder(null));
     }
 
     @Test
+    @Feature("Get Order")
     void getExistAskOrder() {
         final BigDecimal price = new BigDecimal("1.11");
         final int quantity = 100;
@@ -158,6 +178,7 @@ class OrderBookTest {
         Assert.assertEquals(quantity, ob.getOrder(id).quantity);
     }
     @Test
+    @Feature("Get Order")
     void getExistBidOrder() {
         final BigDecimal price = new BigDecimal("1.11");
         final int quantity = 100;
@@ -168,6 +189,7 @@ class OrderBookTest {
 
 
     @Test
+    @Feature("Market Data")
     void checkPriceOrderMarketData() {
 
         final int quantity = 1;
@@ -200,6 +222,7 @@ class OrderBookTest {
     }
 
     @Test
+    @Feature("Market Data")
     void checkQuantityMarketData() {
 
         final int quantity = 1;
@@ -226,6 +249,7 @@ class OrderBookTest {
     }
 
     @Test
+    @Feature("Market Data")
     void getEmptyMarketData() {
         Gson gson = new Gson();
         Map mapMarketData = gson.fromJson(ob.getMarketData(), Map.class);

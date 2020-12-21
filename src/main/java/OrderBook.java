@@ -8,8 +8,15 @@ import java.util.*;
 
 public class OrderBook implements IOrderBook {
 
-    private HashMap<UUID, Order> asks = new HashMap<UUID, Order>();
-    private HashMap<UUID, Order> bids = new HashMap<UUID, Order>();
+    //List of asks
+    private HashMap<UUID, Order> asks;
+    //List of bids
+    private HashMap<UUID, Order> bids;
+
+    public OrderBook() {
+        asks = new HashMap<UUID, Order>();
+        bids = new HashMap<UUID, Order>();
+    }
 
     public UUID addAsk (BigDecimal price, int quantity) {
         return addOrder(OrderType.ASK, price, quantity);
@@ -23,13 +30,14 @@ public class OrderBook implements IOrderBook {
         UUID id = UUID.randomUUID();
         switch(orderType) {
             case ASK:
+                //add new ask
                 asks.put(id, new Order(price, quantity));
                 break;
             case BID:
+                //add new bid
                 bids.put(id, new Order(price, quantity));
                 break;
         }
-
         return id;
     }
 
@@ -42,7 +50,7 @@ public class OrderBook implements IOrderBook {
             bids.remove(id);
             return id;
         }
-
+        //if order is not exist
         return null;
     }
 
@@ -51,7 +59,7 @@ public class OrderBook implements IOrderBook {
             return asks.get(id);
         else if (bids.containsKey(id))
             return bids.get(id);
-
+        //if order is not exist
         return null;
     }
 
@@ -60,21 +68,21 @@ public class OrderBook implements IOrderBook {
         jsonOrderBook.put("asks", formatData(asks));
         jsonOrderBook.put("bids", formatData(bids));
 
-
-
+        //return format json of asks and bids
         return new GsonBuilder().setPrettyPrinting().create().toJson(jsonOrderBook);
     }
 
 
     private JSONArray formatData(HashMap<UUID, Order> orders) {
 
+        //sort asks and bids
         List<Order> listOrders = new ArrayList<>(orders.values());
         listOrders.sort(Comparator.comparing(order -> order.price));
 
+        //build json of asks and bids
         JSONArray jaOrders = new JSONArray();
         for (Order a: listOrders) {
             JSONObject jo = new JSONObject();
-            //jo.put("id", a.id);
             jo.put("price", a.price);
             jo.put("quantity", a.quantity);
 
